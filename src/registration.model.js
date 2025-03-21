@@ -29,10 +29,7 @@ const userSchema= new mongoose.Schema({
         required:true,
         unique:true
     },
-    location:{
-        type:String,
-        required:true
-    },
+
     organization:{
         type:String,
 

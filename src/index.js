@@ -43,7 +43,7 @@ app.get("/api/signup", (req, res) => {
   res.render("signup");
 });
 
-// ✅ Fix: Login Route Logic
+
 app.post("/api/login", async (req, res) => {
   try {
     const check = await collection.findOne({ email: req.body.email });
@@ -101,6 +101,10 @@ app.get("/logout", (req, res) => {
     if (err) return res.status(500).send("Error logging out");
     res.redirect("/api/login");
   });
+});
+
+app.get("/product", (req, res) => {
+  res.render("product"); // Assuming product.ejs exists in the 'views' folder
 });
 
 const port = process.env.PORT || 8000;

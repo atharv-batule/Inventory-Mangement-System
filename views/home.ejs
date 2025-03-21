@@ -3,29 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="/public/style.css"> <!-- Link to CSS (optional) -->
+    <title>Inventory Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <header>
-        <h1>Welcome to Our Website</h1>
-        <nav>
-            <ul>
-                <a href="/api/signup">Signup</a>
-<a href="/api/login">Login</a>
+<body class="bg-blue-200">
 
-                <li><a href="/logout">Logout</a><li>
-            </ul>
-        </nav>
-    </header>
+  
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class=" w-64 bg-gray-900 text-white p-5">
+            <h2 class="text-2xl font-bold mb-8">Admin Panel</h2>
+            <!-- <ul class="space-y-4">
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Dashboard</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Users</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Groups</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Brands</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Categories</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Stores</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Products</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Orders</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Reports</li>
+                <li class="hover:bg-gray-700 p-2 rounded cursor-pointer">Settings</li>
+            </ul> -->
+        </div>
 
-    <main>
-        <h2>Home Page</h2>
-        <p>This is the home page of our application.</p>
-    </main>
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <h1 class="text-3xl font-semibold mb-6">Dashboard</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div id="vendors-card" class="bg-blue-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:scale-105 transition-transform">
+                    <h3 class="text-xl">Vendor List</h3>
+                    <p id="total-vendors" class="text-4xl font-bold mt-4">0</p>
+                </div>
 
-    <footer>
-        <p>&copy; 2025 Your Company Name</p>
-    </footer>
+                <!-- Card 2 -->
+                <div id="invoices-card" class="bg-green-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:scale-105 transition-transform">
+                    <h3 class="text-xl">Invoices</h3>
+                    <p id="total-invoices" class="text-4xl font-bold mt-4">0</p>
+                </div>
+
+                <a href="/product">
+                    <div id="products-card" class="bg-orange-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:scale-105 transition-transform">
+                        <h3 class="text-xl">Products</h3>
+                        <p id="total-products" class="text-4xl font-bold mt-4">1</p>
+                    </div>
+                </a>
+                
+
+                <!-- Card 4 -->
+                <div id="stocks-card" class="bg-emerald-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:scale-105 transition-transform">
+                    <h3 class="text-xl">Current Stock</h3>
+                    <p id="total-stocks" class="text-4xl font-bold mt-4">0</p>
+                </div>
+
+                <!-- Card 5 -->
+                <div id="sales-card" class="bg-fuchsia-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:scale-105 transition-transform">
+                    <h3 class="text-xl">Sales</h3>
+                    <p id="total-sales" class="text-4xl font-bold mt-4">0</p>
+                </div>
+
+                 <!-- Card 6 -->
+                 <div id="users-card" class="bg-red-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:scale-105 transition-transform">
+                    <h3 class="text-xl">User and Admin Details</h3>
+                    <p id="total-users" class="text-4xl font-bold mt-4">0</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
 </body>
 </html>
