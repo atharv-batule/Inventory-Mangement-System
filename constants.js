@@ -1,1 +1,1 @@
-export const DB_NAME="CarbonBazar1"
+export const DB_NAME="Inventorymanagement"
