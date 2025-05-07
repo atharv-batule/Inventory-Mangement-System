@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vendor List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">Vendor List</h1>
+
+    <!-- Vendor Input Form -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+      <form action="/add-vendor" method="POST" class="mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <input name="vendorId" type="text" placeholder="Vendor ID" class="p-2 border rounded" required />
+          <input name="name" type="text" placeholder="Name" class="p-2 border rounded" required />
+          <input name="email" type="email" placeholder="Email" class="p-2 border rounded" required />
+          <input name="contact" type="text" placeholder="Contact No." class="p-2 border rounded" required />
+          <input name="gstId" type="text" placeholder="GST ID" class="p-2 border rounded" required />
+        </div>
+        <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Vendor</button>
+      </form>
+    </div>
+
+    <!-- Vendor Table -->
+    <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+      <table class="min-w-full table-auto">
+        <thead>
+          <tr class="bg-gray-200 text-left">
+            <th class="p-2 text-center">Vendor ID</th>
+            <th class="p-2 text-center">Name</th>
+            <th class="p-2 text-center">Email</th>
+            <th class="p-2 text-center">Contact No.</th>
+            <th class="p-2 text-center">GST ID</th>
+            <th class="p-2 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (vendors.length === 0) { %>
+            <tr>
+              <td colspan="6" class="p-4 text-center text-gray-500">No vendors available.</td>
+            </tr>
+          <% } else { %>
+            <% vendors.forEach(vendor => { %>
+              <tr class="border-t hover:bg-gray-50">
+                <td class="p-2 text-center"><%= vendor.vendorId %></td>
+                <td class="p-2 text-center"><%= vendor.name %></td>
+                <td class="p-2 text-center"><%= vendor.email %></td>
+                <td class="p-2 text-center"><%= vendor.contact %></td>
+                <td class="p-2 text-center"><%= vendor.gstId %></td>
+                <td class="p-2 text-center">
+                  <form action="/delete-vendor/<%= vendor._id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this vendor?');">
+                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+                  </form>
+                  <form action="/edit-vendor/<%= vendor._id %>" method="POST" class="inline-block">
+                    <input type="hidden" name="vendorId" value="<%= vendor.vendorId %>">
+                    <input type="hidden" name="name" value="<%= vendor.name %>">
+                    <input type="hidden" name="email" value="<%= vendor.email %>">
+                    <input type="hidden" name="contact" value="<%= vendor.contact %>">
+                    <input type="hidden" name="gstId" value="<%= vendor.gstId %>">
+                    <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  
+</body>
+</html>
+<!-- Edit Vendor Modal -->
+<div id="editVendorModal" class="modal-overlay flex justify-center items-center hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+    <h2 class="text-2xl font-bold mb-4">Edit Vendor</h2>
+    <!-- Form now posts to /update-vendor -->
+    <form id="editVendorForm" action="/update-vendor" method="POST">
+      <input type="hidden" name="vendorId" id="vendorId">
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+        <input name="name" type="text" id="name" class="p-2 border rounded w-full" required>
+      </div>
+      <div class="mb-4">
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input name="email" type="email" id="email" class="p-2 border rounded w-full" required>
+      </div>
+      <div class="mb-4">
+        <label for="contact" class="block text-sm font-medium text-gray-700">Contact</label>
+        <input name="contact" type="text" id="contact" class="p-2 border rounded w-full" required>
+      </div>
+      <div class="mb-4">
+        <label for="gstId" class="block text-sm font-medium text-gray-700">GST ID</label>
+        <input name="gstId" type="text" id="gstId" class="p-2 border rounded w-full" required>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeEditModal()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Cancel</button>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <script>
+    // Open the edit modal and populate it with vendor data
+    function openEditModal(vendorId, vendorName, vendorEmail, vendorContact, vendorGstId) {
+      document.getElementById('editVendorModal').classList.remove('hidden');
+      document.getElementById('vendorId').value = vendorId;
+      document.getElementById('name').value = vendorName;
+      document.getElementById('email').value = vendorEmail;
+      document.getElementById('contact').value = vendorContact;
+      document.getElementById('gstId').value = vendorGstId;
+    }
+
+    // Close the edit modal
+    function closeEditModal() {
+      document.getElementById('editVendorModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
