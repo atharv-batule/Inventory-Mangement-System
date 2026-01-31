@@ -3,124 +3,628 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Vendor List</title>
+  <title>Vendor Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+    }
+    
+    .vendor-card {
+      transition: all 0.3s ease;
+    }
+    
+    .vendor-card:hover {
+      transform: translateX(8px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
-  <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-center">Vendor List</h1>
-
-    <!-- Vendor Input Form -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-      <form action="/add-vendor" method="POST" class="mb-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <input name="vendorId" type="text" placeholder="Vendor ID" class="p-2 border rounded" required />
-          <input name="name" type="text" placeholder="Name" class="p-2 border rounded" required />
-          <input name="email" type="email" placeholder="Email" class="p-2 border rounded" required />
-          <input name="contact" type="text" placeholder="Contact No." class="p-2 border rounded" required />
-          <input name="gstId" type="text" placeholder="GST ID" class="p-2 border rounded" required />
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+  
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <!-- Left Side: Back Button + Organization Name -->
+        <div class="flex items-center space-x-4">
+          <button onclick="window.history.back()" class="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            <span class="text-slate-700 font-medium">Back</span>
+          </button>
+          
+          <div class="h-8 w-px bg-slate-300"></div>
+          
+          <div>
+            <h1 class="text-2xl font-bold text-slate-800">Inventory Pro</h1>
+            <p class="text-xs text-slate-500">Vendor Management System</p>
+          </div>
         </div>
-        <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Vendor</button>
+        
+        <!-- Right Side: Register Button -->
+        <button onclick="openRegisterModal()" class="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Register New Vendor</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-3xl font-bold text-slate-800 mb-2">Vendor Directory</h2>
+          <p class="text-slate-600">Manage and view all registered vendors</p>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="relative">
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Search vendors..." 
+            class="pl-10 pr-4 py-2 w-80 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            onkeyup="filterVendors()"
+          >
+          <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-xl p-4 shadow-md border border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-slate-600">Total Vendors</p>
+            <p class="text-2xl font-bold text-slate-800" id="totalVendors">5</p>
+          </div>
+          <div class="p-3 bg-blue-100 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl p-4 shadow-md border border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-slate-600">Active</p>
+            <p class="text-2xl font-bold text-green-600">5</p>
+          </div>
+          <div class="p-3 bg-green-100 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl p-4 shadow-md border border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-slate-600">GST Verified</p>
+            <p class="text-2xl font-bold text-purple-600">5</p>
+          </div>
+          <div class="p-3 bg-purple-100 rounded-lg">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl p-4 shadow-md border border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-slate-600">This Month</p>
+            <p class="text-2xl font-bold text-orange-600">2</p>
+          </div>
+          <div class="p-3 bg-orange-100 rounded-lg">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendor List -->
+    <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+        <h3 class="text-lg font-semibold text-slate-800">All Vendors</h3>
+      </div>
+      
+      <div id="vendorList" class="divide-y divide-slate-200">
+        <!-- Vendor Card 1 -->
+        <div class="vendor-card p-6 hover:bg-slate-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6 flex-1">
+              <!-- Vendor Avatar -->
+              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                SS
+              </div>
+              
+              <!-- Vendor Details -->
+              <div class="flex-1 grid grid-cols-5 gap-4">
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
+                  <p class="font-semibold text-slate-800">V001</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Name</p>
+                  <p class="font-semibold text-slate-800">SUSHANT STORES</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Email</p>
+                  <p class="text-slate-700">sushantstore@gmail.com</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Contact</p>
+                  <p class="text-slate-700">8208516233</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
+                  <p class="text-slate-700 font-mono text-sm">30ASDFG9876N1Z1</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-2 ml-4">
+              <button onclick="openEditModal('V001', 'SUSHANT STORES', 'sushantstore@gmail.com', '8208516233', '30ASDFG9876N1Z1')" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+              </button>
+              <button onclick="deleteVendor('V001')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vendor Card 2 -->
+        <div class="vendor-card p-6 hover:bg-slate-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6 flex-1">
+              <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                DM
+              </div>
+              <div class="flex-1 grid grid-cols-5 gap-4">
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
+                  <p class="font-semibold text-slate-800">V002</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Name</p>
+                  <p class="font-semibold text-slate-800">DG MART</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Email</p>
+                  <p class="text-slate-700">dgmart@gmail.com</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Contact</p>
+                  <p class="text-slate-700">9423313893</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
+                  <p class="text-slate-700 font-mono text-sm">30TYUIO1234M1Z5</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 ml-4">
+              <button onclick="openEditModal('V002', 'DG MART', 'dgmart@gmail.com', '9423313893', '30TYUIO1234M1Z5')" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+              </button>
+              <button onclick="deleteVendor('V002')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vendor Card 3 -->
+        <div class="vendor-card p-6 hover:bg-slate-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6 flex-1">
+              <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                VM
+              </div>
+              <div class="flex-1 grid grid-cols-5 gap-4">
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
+                  <p class="font-semibold text-slate-800">V003</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Name</p>
+                  <p class="font-semibold text-slate-800">VISHAL MEGA MART</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Email</p>
+                  <p class="text-slate-700">vishal@gmail.com</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Contact</p>
+                  <p class="text-slate-700">7972836894</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
+                  <p class="text-slate-700 font-mono text-sm">30TYUIO1234M1Z5</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 ml-4">
+              <button onclick="openEditModal('V003', 'VISHAL MEGA MART', 'vishal@gmail.com', '7972836894', '30TYUIO1234M1Z5')" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+              </button>
+              <button onclick="deleteVendor('V003')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vendor Card 4 -->
+        <div class="vendor-card p-6 hover:bg-slate-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6 flex-1">
+              <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                TC
+              </div>
+              <div class="flex-1 grid grid-cols-5 gap-4">
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
+                  <p class="font-semibold text-slate-800">V004</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Name</p>
+                  <p class="font-semibold text-slate-800">TOP CHOICE</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Email</p>
+                  <p class="text-slate-700">toppchoice@gmail.com</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Contact</p>
+                  <p class="text-slate-700">8767109913</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
+                  <p class="text-slate-700 font-mono text-sm">30MNZXC7890T1Z9</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 ml-4">
+              <button onclick="openEditModal('V004', 'TOP CHOICE', 'toppchoice@gmail.com', '8767109913', '30MNZXC7890T1Z9')" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+              </button>
+              <button onclick="deleteVendor('V004')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vendor Card 5 -->
+        <div class="vendor-card p-6 hover:bg-slate-50">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6 flex-1">
+              <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                NG
+              </div>
+              <div class="flex-1 grid grid-cols-5 gap-4">
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
+                  <p class="font-semibold text-slate-800">V005</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Name</p>
+                  <p class="font-semibold text-slate-800">NARAYAN GEN STORES</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Email</p>
+                  <p class="text-slate-700">naryanstores@gmail.com</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">Contact</p>
+                  <p class="text-slate-700">9012378342</p>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
+                  <p class="text-slate-700 font-mono text-sm">30PLMNO5678K1Z3</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 ml-4">
+              <button onclick="openEditModal('V005', 'NARAYAN GEN STORES', 'naryanstores@gmail.com', '9012378342', '30PLMNO5678K1Z3')" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+              </button>
+              <button onclick="deleteVendor('V005')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Vendor Modal -->
+  <div id="registerVendorModal" class="modal-overlay hidden flex justify-center items-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+        <h2 class="text-2xl font-bold text-white">Register New Vendor</h2>
+        <p class="text-blue-100 text-sm">Add a new vendor to your directory</p>
+      </div>
+      
+      <form action="/add-vendor" method="POST" class="p-6">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor ID</label>
+            <input 
+              name="vendorId" 
+              type="text" 
+              placeholder="e.g., V006" 
+              class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              required 
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor Name</label>
+            <input 
+              name="name" 
+              type="text" 
+              placeholder="e.g., ABC Stores" 
+              class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+          <input 
+            name="email" 
+            type="email" 
+            placeholder="vendor@example.com" 
+            class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+            required 
+          />
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Contact Number</label>
+            <input 
+              name="contact" 
+              type="tel" 
+              placeholder="1234567890" 
+              class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              required 
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">GST ID</label>
+            <input 
+              name="gstId" 
+              type="text" 
+              placeholder="22AAAAA0000A1Z5" 
+              class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+          <button 
+            type="button" 
+            onclick="closeRegisterModal()" 
+            class="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+          >
+            Register Vendor
+          </button>
+        </div>
       </form>
     </div>
+  </div>
 
-    <!-- Vendor Table -->
-    <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-      <table class="min-w-full table-auto">
-        <thead>
-          <tr class="bg-gray-200 text-left">
-            <th class="p-2 text-center">Vendor ID</th>
-            <th class="p-2 text-center">Name</th>
-            <th class="p-2 text-center">Email</th>
-            <th class="p-2 text-center">Contact No.</th>
-            <th class="p-2 text-center">GST ID</th>
-            <th class="p-2 text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (vendors.length === 0) { %>
-            <tr>
-              <td colspan="6" class="p-4 text-center text-gray-500">No vendors available.</td>
-            </tr>
-          <% } else { %>
-            <% vendors.forEach(vendor => { %>
-              <tr class="border-t hover:bg-gray-50">
-                <td class="p-2 text-center"><%= vendor.vendorId %></td>
-                <td class="p-2 text-center"><%= vendor.name %></td>
-                <td class="p-2 text-center"><%= vendor.email %></td>
-                <td class="p-2 text-center"><%= vendor.contact %></td>
-                <td class="p-2 text-center"><%= vendor.gstId %></td>
-                <td class="p-2 text-center">
-                  <form action="/delete-vendor/<%= vendor._id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this vendor?');">
-                    <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-                  </form>
-                  <form action="/edit-vendor/<%= vendor._id %>" method="POST" class="inline-block">
-                    <input type="hidden" name="vendorId" value="<%= vendor.vendorId %>">
-                    <input type="hidden" name="name" value="<%= vendor.name %>">
-                    <input type="hidden" name="email" value="<%= vendor.email %>">
-                    <input type="hidden" name="contact" value="<%= vendor.contact %>">
-                    <input type="hidden" name="gstId" value="<%= vendor.gstId %>">
-                    <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Edit</button>
-                  </form>
-                </td>
-              </tr>
-            <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+  <!-- Edit Vendor Modal -->
+  <div id="editVendorModal" class="modal-overlay hidden flex justify-center items-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+      <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4">
+        <h2 class="text-2xl font-bold text-white">Edit Vendor Details</h2>
+        <p class="text-yellow-100 text-sm">Update vendor information</p>
+      </div>
+      
+      <form id="editVendorForm" action="/update-vendor" method="POST" class="p-6">
+        <input type="hidden" name="vendorId" id="editVendorId">
+        
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor Name</label>
+          <input 
+            name="name" 
+            type="text" 
+            id="editName" 
+            class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+            required
+          >
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+          <input 
+            name="email" 
+            type="email" 
+            id="editEmail" 
+            class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+            required
+          >
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Contact Number</label>
+            <input 
+              name="contact" 
+              type="tel" 
+              id="editContact" 
+              class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+              required
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">GST ID</label>
+            <input 
+              name="gstId" 
+              type="text" 
+              id="editGstId" 
+              class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+              required
+            >
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+          <button 
+            type="button" 
+            onclick="closeEditModal()" 
+            class="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
-  
-</body>
-</html>
-<!-- Edit Vendor Modal -->
-<div id="editVendorModal" class="modal-overlay flex justify-center items-center hidden">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-    <h2 class="text-2xl font-bold mb-4">Edit Vendor</h2>
-    <!-- Form now posts to /update-vendor -->
-    <form id="editVendorForm" action="/update-vendor" method="POST">
-      <input type="hidden" name="vendorId" id="vendorId">
-      <div class="mb-4">
-        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-        <input name="name" type="text" id="name" class="p-2 border rounded w-full" required>
-      </div>
-      <div class="mb-4">
-        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <input name="email" type="email" id="email" class="p-2 border rounded w-full" required>
-      </div>
-      <div class="mb-4">
-        <label for="contact" class="block text-sm font-medium text-gray-700">Contact</label>
-        <input name="contact" type="text" id="contact" class="p-2 border rounded w-full" required>
-      </div>
-      <div class="mb-4">
-        <label for="gstId" class="block text-sm font-medium text-gray-700">GST ID</label>
-        <input name="gstId" type="text" id="gstId" class="p-2 border rounded w-full" required>
-      </div>
-      <div class="flex justify-end gap-2">
-        <button type="button" onclick="closeEditModal()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Cancel</button>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Changes</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-
   <script>
-    // Open the edit modal and populate it with vendor data
-    function openEditModal(vendorId, vendorName, vendorEmail, vendorContact, vendorGstId) {
-      document.getElementById('editVendorModal').classList.remove('hidden');
-      document.getElementById('vendorId').value = vendorId;
-      document.getElementById('name').value = vendorName;
-      document.getElementById('email').value = vendorEmail;
-      document.getElementById('contact').value = vendorContact;
-      document.getElementById('gstId').value = vendorGstId;
+    // Open Register Modal
+    function openRegisterModal() {
+      document.getElementById('registerVendorModal').classList.remove('hidden');
     }
 
-    // Close the edit modal
+    // Close Register Modal
+    function closeRegisterModal() {
+      document.getElementById('registerVendorModal').classList.add('hidden');
+    }
+
+    // Open Edit Modal
+    function openEditModal(vendorId, vendorName, vendorEmail, vendorContact, vendorGstId) {
+      document.getElementById('editVendorModal').classList.remove('hidden');
+      document.getElementById('editVendorId').value = vendorId;
+      document.getElementById('editName').value = vendorName;
+      document.getElementById('editEmail').value = vendorEmail;
+      document.getElementById('editContact').value = vendorContact;
+      document.getElementById('editGstId').value = vendorGstId;
+    }
+
+    // Close Edit Modal
     function closeEditModal() {
       document.getElementById('editVendorModal').classList.add('hidden');
     }
+
+    // Delete Vendor
+    function deleteVendor(vendorId) {
+      if (confirm('Are you sure you want to delete this vendor?')) {
+        // Add your delete logic here
+        console.log('Deleting vendor:', vendorId);
+        // Example: window.location.href = '/delete-vendor/' + vendorId;
+      }
+    }
+
+    // Filter Vendors
+    function filterVendors() {
+      const searchInput = document.getElementById('searchInput').value.toLowerCase();
+      const vendorCards = document.querySelectorAll('.vendor-card');
+      
+      vendorCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(searchInput)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('registerVendorModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeRegisterModal();
+      }
+    });
+
+    document.getElementById('editVendorModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeEditModal();
+      }
+    });
   </script>
 </body>
 </html>
