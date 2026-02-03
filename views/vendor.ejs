@@ -128,7 +128,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-slate-600">Total Vendors</p>
-            <p class="text-2xl font-bold text-slate-800" id="totalVendors">5</p>
+            <p class="text-2xl font-bold text-slate-800" id="totalVendors"><%= vendors.length %></p>
           </div>
           <div class="p-3 bg-blue-100 rounded-lg">
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,7 +142,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-slate-600">Active</p>
-            <p class="text-2xl font-bold text-green-600">5</p>
+            <p class="text-2xl font-bold text-green-600"><%= vendors.length %></p>
           </div>
           <div class="p-3 bg-green-100 rounded-lg">
             <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +156,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-slate-600">GST Verified</p>
-            <p class="text-2xl font-bold text-purple-600">5</p>
+            <p class="text-2xl font-bold text-purple-600"><%= vendors.length %></p>
           </div>
           <div class="p-3 bg-purple-100 rounded-lg">
             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +170,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-slate-600">This Month</p>
-            <p class="text-2xl font-bold text-orange-600">2</p>
+            <p class="text-2xl font-bold text-orange-600"><%= vendors.length > 0 ? Math.min(2, vendors.length) : 0 %></p>
           </div>
           <div class="p-3 bg-orange-100 rounded-lg">
             <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,280 +188,92 @@
       </div>
       
       <div id="vendorList" class="divide-y divide-slate-200">
-        <!-- Vendor Card 1 -->
-        <div class="vendor-card p-6 hover:bg-slate-50">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center space-x-4 flex-1 min-w-0">
-              <!-- Vendor Avatar -->
-              <div class="w-14 h-14 flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                SS
-              </div>
-              
-              <!-- Vendor Details -->
-              <div class="flex-1 grid grid-cols-5 gap-3 min-w-0">
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
-                  <p class="font-semibold text-slate-800 truncate">V001</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Name</p>
-                  <p class="font-semibold text-slate-800 truncate">SUSHANT STORES</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Email</p>
-                  <p class="text-slate-700 text-sm truncate">sushantstore@gmail.com</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Contact</p>
-                  <p class="text-slate-700 truncate">8208516233</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
-                  <p class="text-slate-700 font-mono text-xs truncate">30ASDFG9876N1Z1</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Three Dot Menu -->
-            <div class="relative flex-shrink-0">
-              <button onclick="toggleDropdown('dropdown1')" class="p-2 hover:bg-slate-200 rounded-lg transition-colors">
-                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                </svg>
-              </button>
-              <div id="dropdown1" class="dropdown-menu">
-                <button onclick="openEditModal('V001', 'SUSHANT STORES', 'sushantstore@gmail.com', '8208516233', '30ASDFG9876N1Z1'); toggleDropdown('dropdown1')" class="flex items-center space-x-2 text-slate-700 hover:text-yellow-600">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
-                  <span>Edit Vendor</span>
-                </button>
-                <button onclick="deleteVendor('V001'); toggleDropdown('dropdown1')" class="flex items-center space-x-2 text-slate-700 hover:text-red-600 border-t border-slate-200">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                  <span>Delete Vendor</span>
-                </button>
-              </div>
-            </div>
+        <% if (vendors.length === 0) { %>
+          <div class="p-12 text-center">
+            <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+            </svg>
+            <p class="text-slate-500 text-lg font-medium">No vendors registered yet</p>
+            <p class="text-slate-400 text-sm mt-2">Click "Register New Vendor" to add your first vendor</p>
           </div>
-        </div>
-
-        <!-- Vendor Card 2 -->
-        <div class="vendor-card p-6 hover:bg-slate-50">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center space-x-4 flex-1 min-w-0">
-              <div class="w-14 h-14 flex-shrink-0 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                DM
-              </div>
-              <div class="flex-1 grid grid-cols-5 gap-3 min-w-0">
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
-                  <p class="font-semibold text-slate-800 truncate">V002</p>
+        <% } else { %>
+          <% 
+          const colors = [
+            'from-blue-500 to-purple-500',
+            'from-green-500 to-teal-500',
+            'from-orange-500 to-red-500',
+            'from-pink-500 to-purple-500',
+            'from-indigo-500 to-blue-500',
+            'from-yellow-500 to-orange-500',
+            'from-red-500 to-pink-500',
+            'from-teal-500 to-green-500'
+          ];
+          
+          vendors.forEach((vendor, index) => { 
+            const colorClass = colors[index % colors.length];
+            const initials = vendor.name.split(' ').map(word => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+          %>
+            <div class="vendor-card p-6 hover:bg-slate-50" data-vendor-info="<%= vendor.vendorId %> <%= vendor.name %> <%= vendor.email %> <%= vendor.contact %> <%= vendor.gstId %>">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center space-x-4 flex-1 min-w-0">
+                  <!-- Vendor Avatar -->
+                  <div class="w-14 h-14 flex-shrink-0 bg-gradient-to-br <%= colorClass %> rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <%= initials %>
+                  </div>
+                  
+                  <!-- Vendor Details -->
+                  <div class="flex-1 grid grid-cols-5 gap-3 min-w-0">
+                    <div class="min-w-0">
+                      <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
+                      <p class="font-semibold text-slate-800 truncate"><%= vendor.vendorId %></p>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-xs text-slate-500 mb-1">Name</p>
+                      <p class="font-semibold text-slate-800 truncate"><%= vendor.name %></p>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-xs text-slate-500 mb-1">Email</p>
+                      <p class="text-slate-700 text-sm truncate"><%= vendor.email %></p>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-xs text-slate-500 mb-1">Contact</p>
+                      <p class="text-slate-700 truncate"><%= vendor.contact %></p>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-xs text-slate-500 mb-1">GST ID</p>
+                      <p class="text-slate-700 font-mono text-xs truncate"><%= vendor.gstId %></p>
+                    </div>
+                  </div>
                 </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Name</p>
-                  <p class="font-semibold text-slate-800 truncate">DG MART</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Email</p>
-                  <p class="text-slate-700 text-sm truncate">dgmart@gmail.com</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Contact</p>
-                  <p class="text-slate-700 truncate">9423313893</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
-                  <p class="text-slate-700 font-mono text-xs truncate">30TYUIO1234M1Z5</p>
-                </div>
-              </div>
-            </div>
-            <div class="relative flex-shrink-0">
-              <button onclick="toggleDropdown('dropdown2')" class="p-2 hover:bg-slate-200 rounded-lg transition-colors">
-                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                </svg>
-              </button>
-              <div id="dropdown2" class="dropdown-menu">
-                <button onclick="openEditModal('V002', 'DG MART', 'dgmart@gmail.com', '9423313893', '30TYUIO1234M1Z5'); toggleDropdown('dropdown2')" class="flex items-center space-x-2 text-slate-700 hover:text-yellow-600">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
-                  <span>Edit Vendor</span>
-                </button>
-                <button onclick="deleteVendor('V002'); toggleDropdown('dropdown2')" class="flex items-center space-x-2 text-slate-700 hover:text-red-600 border-t border-slate-200">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                  <span>Delete Vendor</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Vendor Card 3 -->
-        <div class="vendor-card p-6 hover:bg-slate-50">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center space-x-4 flex-1 min-w-0">
-              <div class="w-14 h-14 flex-shrink-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                VM
-              </div>
-              <div class="flex-1 grid grid-cols-5 gap-3 min-w-0">
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
-                  <p class="font-semibold text-slate-800 truncate">V003</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Name</p>
-                  <p class="font-semibold text-slate-800 truncate">VISHAL MEGA MART</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Email</p>
-                  <p class="text-slate-700 text-sm truncate">vishal@gmail.com</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Contact</p>
-                  <p class="text-slate-700 truncate">7972836894</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
-                  <p class="text-slate-700 font-mono text-xs truncate">30TYUIO1234M1Z5</p>
+                
+                <!-- Three Dot Menu -->
+                <div class="relative flex-shrink-0">
+                  <button onclick="toggleDropdown('dropdown<%= index %>')" class="p-2 hover:bg-slate-200 rounded-lg transition-colors">
+                    <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                    </svg>
+                  </button>
+                  <div id="dropdown<%= index %>" class="dropdown-menu">
+                    <button onclick="openEditModal('<%= vendor._id %>', '<%= vendor.vendorId %>', '<%= vendor.name %>', '<%= vendor.email %>', '<%= vendor.contact %>', '<%= vendor.gstId %>'); toggleDropdown('dropdown<%= index %>')" class="flex items-center space-x-2 text-slate-700 hover:text-yellow-600">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                      <span>Edit Vendor</span>
+                    </button>
+                    <form action="/delete-vendor/<%= vendor._id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this vendor?');" class="m-0">
+                      <button type="submit" class="flex items-center space-x-2 text-slate-700 hover:text-red-600 border-t border-slate-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        <span>Delete Vendor</span>
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="relative flex-shrink-0">
-              <button onclick="toggleDropdown('dropdown3')" class="p-2 hover:bg-slate-200 rounded-lg transition-colors">
-                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                </svg>
-              </button>
-              <div id="dropdown3" class="dropdown-menu">
-                <button onclick="openEditModal('V003', 'VISHAL MEGA MART', 'vishal@gmail.com', '7972836894', '30TYUIO1234M1Z5'); toggleDropdown('dropdown3')" class="flex items-center space-x-2 text-slate-700 hover:text-yellow-600">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
-                  <span>Edit Vendor</span>
-                </button>
-                <button onclick="deleteVendor('V003'); toggleDropdown('dropdown3')" class="flex items-center space-x-2 text-slate-700 hover:text-red-600 border-t border-slate-200">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                  <span>Delete Vendor</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Vendor Card 4 -->
-        <div class="vendor-card p-6 hover:bg-slate-50">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center space-x-4 flex-1 min-w-0">
-              <div class="w-14 h-14 flex-shrink-0 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                TC
-              </div>
-              <div class="flex-1 grid grid-cols-5 gap-3 min-w-0">
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
-                  <p class="font-semibold text-slate-800 truncate">V004</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Name</p>
-                  <p class="font-semibold text-slate-800 truncate">TOP CHOICE</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Email</p>
-                  <p class="text-slate-700 text-sm truncate">toppchoice@gmail.com</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Contact</p>
-                  <p class="text-slate-700 truncate">8767109913</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
-                  <p class="text-slate-700 font-mono text-xs truncate">30MNZXC7890T1Z9</p>
-                </div>
-              </div>
-            </div>
-            <div class="relative flex-shrink-0">
-              <button onclick="toggleDropdown('dropdown4')" class="p-2 hover:bg-slate-200 rounded-lg transition-colors">
-                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                </svg>
-              </button>
-              <div id="dropdown4" class="dropdown-menu">
-                <button onclick="openEditModal('V004', 'TOP CHOICE', 'toppchoice@gmail.com', '8767109913', '30MNZXC7890T1Z9'); toggleDropdown('dropdown4')" class="flex items-center space-x-2 text-slate-700 hover:text-yellow-600">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
-                  <span>Edit Vendor</span>
-                </button>
-                <button onclick="deleteVendor('V004'); toggleDropdown('dropdown4')" class="flex items-center space-x-2 text-slate-700 hover:text-red-600 border-t border-slate-200">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                  <span>Delete Vendor</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Vendor Card 5 -->
-        <div class="vendor-card p-6 hover:bg-slate-50">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center space-x-4 flex-1 min-w-0">
-              <div class="w-14 h-14 flex-shrink-0 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                NG
-              </div>
-              <div class="flex-1 grid grid-cols-5 gap-3 min-w-0">
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Vendor ID</p>
-                  <p class="font-semibold text-slate-800 truncate">V005</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Name</p>
-                  <p class="font-semibold text-slate-800 truncate">NARAYAN GEN STORES</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Email</p>
-                  <p class="text-slate-700 text-sm truncate">naryanstores@gmail.com</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Contact</p>
-                  <p class="text-slate-700 truncate">9012378342</p>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">GST ID</p>
-                  <p class="text-slate-700 font-mono text-xs truncate">30PLMNO5678K1Z3</p>
-                </div>
-              </div>
-            </div>
-            <div class="relative flex-shrink-0">
-              <button onclick="toggleDropdown('dropdown5')" class="p-2 hover:bg-slate-200 rounded-lg transition-colors">
-                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                </svg>
-              </button>
-              <div id="dropdown5" class="dropdown-menu">
-                <button onclick="openEditModal('V005', 'NARAYAN GEN STORES', 'naryanstores@gmail.com', '9012378342', '30PLMNO5678K1Z3'); toggleDropdown('dropdown5')" class="flex items-center space-x-2 text-slate-700 hover:text-yellow-600">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                  </svg>
-                  <span>Edit Vendor</span>
-                </button>
-                <button onclick="deleteVendor('V005'); toggleDropdown('dropdown5')" class="flex items-center space-x-2 text-slate-700 hover:text-red-600 border-t border-slate-200">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                  <span>Delete Vendor</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+          <% }) %>
+        <% } %>
       </div>
     </div>
   </div>
@@ -560,7 +372,18 @@
       </div>
       
       <form id="editVendorForm" action="/update-vendor" method="POST" class="p-6">
-        <input type="hidden" name="vendorId" id="editVendorId">
+        <input type="hidden" name="vendorId" id="editVendorMongoId">
+        
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor ID</label>
+          <input 
+            type="text" 
+            id="editVendorId" 
+            class="w-full p-3 border border-slate-300 rounded-lg bg-slate-100 cursor-not-allowed" 
+            disabled
+            readonly
+          >
+        </div>
         
         <div class="mb-4">
           <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor Name</label>
@@ -663,8 +486,9 @@
     }
 
     // Open Edit Modal
-    function openEditModal(vendorId, vendorName, vendorEmail, vendorContact, vendorGstId) {
+    function openEditModal(mongoId, vendorId, vendorName, vendorEmail, vendorContact, vendorGstId) {
       document.getElementById('editVendorModal').classList.remove('hidden');
+      document.getElementById('editVendorMongoId').value = mongoId;
       document.getElementById('editVendorId').value = vendorId;
       document.getElementById('editName').value = vendorName;
       document.getElementById('editEmail').value = vendorEmail;
@@ -677,23 +501,14 @@
       document.getElementById('editVendorModal').classList.add('hidden');
     }
 
-    // Delete Vendor
-    function deleteVendor(vendorId) {
-      if (confirm('Are you sure you want to delete this vendor?')) {
-        // Add your delete logic here
-        console.log('Deleting vendor:', vendorId);
-        // Example: window.location.href = '/delete-vendor/' + vendorId;
-      }
-    }
-
     // Filter Vendors
     function filterVendors() {
       const searchInput = document.getElementById('searchInput').value.toLowerCase();
       const vendorCards = document.querySelectorAll('.vendor-card');
       
       vendorCards.forEach(card => {
-        const text = card.textContent.toLowerCase();
-        if (text.includes(searchInput)) {
+        const vendorInfo = card.getAttribute('data-vendor-info').toLowerCase();
+        if (vendorInfo.includes(searchInput)) {
           card.style.display = '';
         } else {
           card.style.display = 'none';

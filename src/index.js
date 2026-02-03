@@ -185,33 +185,6 @@ app.post('/add-vendor', async (req, res) => {
   }
 });
 
-// // Create - Add new vendor
-// app.post('/add-vendor', async (req, res) => {
-//   try {
-//     const { vendorId, name, email, contact, gstId } = req.body;
-    
-//     // Check if vendor ID already exists
-//     const existingVendor = await Vendor.findOne({ vendorId });
-//     if (existingVendor) {
-//       return res.status(400).send('Vendor ID already exists');
-//     }
-
-//     const newVendor = new Vendor({
-//       vendorId,
-//       name,
-//       email,
-//       contact,
-//       gstId
-//     });
-
-//     await newVendor.save();
-//     res.redirect('/');
-//   } catch (error) {
-//     console.error('Error adding vendor:', error);
-//     res.status(500).send('Error adding vendor');
-//   }
-// });
-
 app.post('/delete-vendor/:id', async (req, res) => {
   const vendorId = req.params.id;
 
