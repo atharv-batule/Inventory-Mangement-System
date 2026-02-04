@@ -132,26 +132,215 @@ app.post('/add-product', async (req, res) => {
 
 // ============== INVENTORY ROUTES ==============
 
-app.get("/Inventory", async (req, res) => {
+app.get("/inventory", async (req, res) => {
   try {
-    const inventory = await Inventory.find();
-    res.render("Inventory", { inventory });
+    const inventory = await Inventory.find().sort({ created_at: -1 });
+    res.render("inventory", { inventory });
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
+    console.error("Error fetching inventory:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-app.get('/inventory', async (req, res) => {
+// Add new inventory item
+app.post('/add-inventory', async (req, res) => {
+  const { product_id, name, description, price, gst, category, quantity, expiry_date } = req.body;
+  
   try {
-    const inventory = await Inventory.find();
-    console.log(inventory);
-    res.render('Inventory', { inventory });
+    // Check if product_id already exists
+    const existingItem = await Inventory.findOne({ product_id });
+    if (existingItem) {
+      return res.status(400).send('Product ID already exists');
+    }
+
+    await Inventory.create({ 
+      product_id, 
+      name, 
+      description, 
+      price: parseFloat(price),
+      gst: parseInt(gst),
+      category,
+      quantity: parseInt(quantity),
+      expiry_date: expiry_date || 'N/A'
+    });
+    
+    res.redirect('/inventory');
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
+    console.error('Error adding inventory item:', error);
+    res.status(500).send('Error adding inventory item');
   }
 });
+
+// Update inventory item
+app.post('/update-inventory', async (req, res) => {
+  const { inventoryId, product_id, name, description, price, gst, category, quantity, expiry_date } = req.body;
+  
+  try {
+    // Check if trying to update to a product_id that already exists (but not the same item)
+    const existingItem = await Inventory.findOne({ 
+      product_id, 
+      _id: { $ne: inventoryId } 
+    });
+    
+    if (existingItem) {
+      return res.status(400).send('Product ID already exists');
+    }
+
+    await Inventory.findByIdAndUpdate(
+      inventoryId,
+      {
+        product_id,
+        name,
+        description,
+        price: parseFloat(price),
+        gst: parseInt(gst),
+        category,
+        quantity: parseInt(quantity),
+        expiry_date: expiry_date || 'N/A'
+      },
+      { new: true, runValidators: true }
+    );
+    
+    res.redirect('/inventory');
+  } catch (error) {
+    console.error('Error updating inventory item:', error);
+    res.status(500).send('Error updating inventory item');
+  }
+});
+
+// Delete inventory item
+app.post('/delete-inventory/:id', async (req, res) => {
+  const inventoryId = req.params.id;
+
+  try {
+    const deletedItem = await Inventory.findByIdAndDelete(inventoryId);
+    
+    if (!deletedItem) {
+      return res.status(404).send('Inventory item not found');
+    }
+    
+    res.redirect('/inventory');
+  } catch (error) {
+    console.error('Error deleting inventory item:', error);
+    res.status(500).send('Failed to delete inventory item');
+  }
+});
+
+// ============== INVENTORY API ROUTES ==============
+
+// Get all inventory items (API endpoint)
+app.get("/api/inventory", async (req, res) => {
+  try {
+    const { category, lowStock, search } = req.query;
+    
+    const query = {};
+    
+    // Filter by category
+    if (category) {
+      query.category = category;
+    }
+    
+    // Filter low stock items (quantity <= 10)
+    if (lowStock === 'true') {
+      query.quantity = { $lte: 10 };
+    }
+    
+    // Search by product_id, name, or description
+    if (search) {
+      query.$or = [
+        { product_id: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const inventory = await Inventory.find(query).sort({ created_at: -1 });
+    res.json(inventory);
+  } catch (error) {
+    console.error("Error fetching inventory:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Get single inventory item by ID (API endpoint)
+app.get("/api/inventory/:id", async (req, res) => {
+  try {
+    const item = await Inventory.findById(req.params.id);
+    
+    if (!item) {
+      return res.status(404).json({ message: "Inventory item not found" });
+    }
+    
+    res.json(item);
+  } catch (error) {
+    console.error("Error fetching inventory item:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Get inventory statistics (API endpoint)
+app.get("/api/inventory/stats/summary", async (req, res) => {
+  try {
+    const allItems = await Inventory.find();
+    
+    const stats = {
+      totalItems: allItems.length,
+      totalStock: allItems.reduce((sum, item) => sum + item.quantity, 0),
+      lowStockItems: allItems.filter(item => item.quantity <= 10).length,
+      totalValue: allItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+      categoryBreakdown: {},
+      averagePrice: allItems.length > 0 
+        ? allItems.reduce((sum, item) => sum + item.price, 0) / allItems.length 
+        : 0
+    };
+    
+    // Calculate category breakdown
+    allItems.forEach(item => {
+      if (!stats.categoryBreakdown[item.category]) {
+        stats.categoryBreakdown[item.category] = {
+          count: 0,
+          totalQuantity: 0,
+          totalValue: 0
+        };
+      }
+      stats.categoryBreakdown[item.category].count++;
+      stats.categoryBreakdown[item.category].totalQuantity += item.quantity;
+      stats.categoryBreakdown[item.category].totalValue += item.price * item.quantity;
+    });
+    
+    res.json(stats);
+  } catch (error) {
+    console.error("Error fetching inventory stats:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Update inventory quantity (API endpoint) - useful for quick stock adjustments
+app.patch("/api/inventory/:id/quantity", async (req, res) => {
+  try {
+    const { quantity } = req.body;
+    
+    if (quantity < 0) {
+      return res.status(400).json({ message: "Quantity cannot be negative" });
+    }
+    
+    const item = await Inventory.findByIdAndUpdate(
+      req.params.id,
+      { quantity: parseInt(quantity) },
+      { new: true, runValidators: true }
+    );
+    
+    if (!item) {
+      return res.status(404).json({ message: "Inventory item not found" });
+    }
+    
+    res.json({ message: "Quantity updated successfully", item });
+  } catch (error) {
+    console.error("Error updating quantity:", error);
+    res.status(500).json({ message: "Error updating quantity" });
+  }
+});
+
 
 // ============== VENDOR ROUTES ==============
 
@@ -217,13 +406,24 @@ app.post('/update-vendor', async (req, res) => {
 
 // ============== INVOICE ROUTES ==============
 
+// ============== IMPROVED INVOICE NUMBER GENERATOR ==============
+
 // Helper function to generate unique invoice number
 function generateInvoiceNumber() {
   const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `INV-${year}${month}-${random}`;
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  // Use timestamp for uniqueness (last 6 digits of milliseconds since epoch)
+  const timestamp = Date.now().toString().slice(-6);
+  
+  // Add random component for extra safety
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  
+  // Format: INV-YYYYMMDD-XXXXXXRRR
+  // Example: INV-20260203-456789123
+  return `INV-${year}${month}${day}-${timestamp}${random}`;
 }
 
 // Display invoice list page
@@ -336,7 +536,7 @@ app.get("/api/invoices/stats/summary", async (req, res) => {
   }
 });
 
-// Create new invoice
+// Create new invoice - WITH DUPLICATE PREVENTION
 app.post("/api/invoices/create", async (req, res) => {
   try {
     const { vendorId, status, items, subtotal, gstTotal, total, notes, dueDate } = req.body;
@@ -347,8 +547,35 @@ app.post("/api/invoices/create", async (req, res) => {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    // Generate unique invoice number
-    const invoiceNumber = generateInvoiceNumber();
+    // Generate unique invoice number with retry logic
+    let invoiceNumber;
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (attempts < maxAttempts) {
+      invoiceNumber = generateInvoiceNumber();
+      
+      // Check if this invoice number already exists
+      const existingInvoice = await Invoice.findOne({ invoiceNumber });
+      
+      if (!existingInvoice) {
+        // Unique number found, break the loop
+        break;
+      }
+      
+      attempts++;
+      console.log(`Invoice number collision detected. Retry attempt ${attempts}/${maxAttempts}`);
+      
+      if (attempts >= maxAttempts) {
+        return res.status(500).json({ 
+          message: "Failed to generate unique invoice number after multiple attempts. Please try again.",
+          error: "Invoice number generation failed"
+        });
+      }
+      
+      // Small delay before retry to ensure timestamp changes
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
 
     // Create invoice
     const invoice = await Invoice.create({
@@ -366,41 +593,67 @@ app.post("/api/invoices/create", async (req, res) => {
       dueDate: dueDate ? new Date(dueDate) : null
     });
 
-    console.log("Invoice created:", invoice);
+    console.log("Invoice created successfully:", invoiceNumber);
     res.status(201).json({ message: "Invoice created successfully", invoice });
   } catch (error) {
     console.error("Error creating invoice:", error);
-    res.status(500).json({ message: "Error creating invoice", error: error.message });
+    
+    // Handle duplicate key error specifically
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        message: "Invoice number already exists. Please try creating the invoice again.",
+        error: "Duplicate invoice number" 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Error creating invoice", 
+      error: error.message 
+    });
   }
 });
 
-// Update invoice
+// Update invoice - FIXED VERSION
 app.put("/api/invoices/:id", async (req, res) => {
   try {
     const { status, items, subtotal, gstTotal, total, notes, dueDate } = req.body;
     
+    // First check if invoice exists
+    const existingInvoice = await Invoice.findById(req.params.id);
+    if (!existingInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+    
+    // Prepare update data - DO NOT include invoiceNumber or vendor details
+    // These should remain unchanged during edit
     const updateData = {
       items,
       subtotal,
       gstTotal,
       total,
       status,
-      notes,
       updatedAt: Date.now()
     };
     
+    // Only update notes if provided
+    if (notes !== undefined) {
+      updateData.notes = notes;
+    }
+    
+    // Only update dueDate if provided
     if (dueDate) {
       updateData.dueDate = new Date(dueDate);
     }
     
-    // If status is being set to Paid, record the paid date
-    if (status === 'Paid') {
+    // If status is being changed to Paid, record the paid date
+    if (status === 'Paid' && existingInvoice.status !== 'Paid') {
       updateData.paidDate = new Date();
     }
     
+    // Use $set to update only specified fields
     const invoice = await Invoice.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      { $set: updateData },
       { new: true, runValidators: true }
     );
 
@@ -408,10 +661,23 @@ app.put("/api/invoices/:id", async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
+    console.log("Invoice updated successfully:", invoice.invoiceNumber);
     res.json({ message: "Invoice updated successfully", invoice });
   } catch (error) {
     console.error("Error updating invoice:", error);
-    res.status(500).json({ message: "Error updating invoice" });
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: "Validation error", 
+        error: error.message 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Error updating invoice",
+      error: error.message 
+    });
   }
 });
 
@@ -420,27 +686,35 @@ app.patch("/api/invoices/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
     
-    const updateData = { status };
+    // Check if invoice exists
+    const existingInvoice = await Invoice.findById(req.params.id);
+    if (!existingInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
     
-    // If status is being set to Paid, record the paid date
-    if (status === 'Paid') {
+    const updateData = { 
+      status,
+      updatedAt: Date.now()
+    };
+    
+    // If status is being changed to Paid, record the paid date
+    if (status === 'Paid' && existingInvoice.status !== 'Paid') {
       updateData.paidDate = new Date();
     }
     
     const invoice = await Invoice.findByIdAndUpdate(
       req.params.id,
-      updateData,
-      { new: true }
+      { $set: updateData },
+      { new: true, runValidators: true }
     );
-    
-    if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
 
     res.json({ message: "Invoice status updated successfully", invoice });
   } catch (error) {
     console.error("Error updating invoice status:", error);
-    res.status(500).json({ message: "Error updating invoice status" });
+    res.status(500).json({ 
+      message: "Error updating invoice status",
+      error: error.message 
+    });
   }
 });
 
@@ -453,6 +727,7 @@ app.delete("/api/invoices/:id", async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
+    console.log("Invoice deleted:", invoice.invoiceNumber);
     res.json({ message: "Invoice deleted successfully" });
   } catch (error) {
     console.error("Error deleting invoice:", error);
@@ -460,7 +735,7 @@ app.delete("/api/invoices/:id", async (req, res) => {
   }
 });
 
-// Duplicate/Clone invoice
+// Duplicate/Clone invoice - WITH DUPLICATE PREVENTION
 app.post("/api/invoices/:id/duplicate", async (req, res) => {
   try {
     const originalInvoice = await Invoice.findById(req.params.id);
@@ -469,8 +744,31 @@ app.post("/api/invoices/:id/duplicate", async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
-    // Create a new invoice based on the original
-    const newInvoiceNumber = generateInvoiceNumber();
+    // Generate unique invoice number with retry logic
+    let newInvoiceNumber;
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (attempts < maxAttempts) {
+      newInvoiceNumber = generateInvoiceNumber();
+      
+      const existingInvoice = await Invoice.findOne({ invoiceNumber: newInvoiceNumber });
+      
+      if (!existingInvoice) {
+        break;
+      }
+      
+      attempts++;
+      console.log(`Duplicate invoice number collision. Retry attempt ${attempts}/${maxAttempts}`);
+      
+      if (attempts >= maxAttempts) {
+        return res.status(500).json({ 
+          message: "Failed to generate unique invoice number. Please try again." 
+        });
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
     
     const duplicateInvoice = await Invoice.create({
       invoiceNumber: newInvoiceNumber,
@@ -486,13 +784,25 @@ app.post("/api/invoices/:id/duplicate", async (req, res) => {
       notes: originalInvoice.notes
     });
 
+    console.log("Invoice duplicated successfully:", newInvoiceNumber);
     res.status(201).json({ 
       message: "Invoice duplicated successfully", 
       invoice: duplicateInvoice 
     });
   } catch (error) {
     console.error("Error duplicating invoice:", error);
-    res.status(500).json({ message: "Error duplicating invoice" });
+    
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        message: "Failed to duplicate invoice. Please try again.",
+        error: "Duplicate invoice number" 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Error duplicating invoice",
+      error: error.message 
+    });
   }
 });
 
