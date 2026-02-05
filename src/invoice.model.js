@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const invoiceSchema = new mongoose.Schema({
-  invoiceNumber: {
+  invoiceId: {
     type: String,
     required: true,
     unique: true,
