@@ -406,25 +406,10 @@ app.post('/update-vendor', async (req, res) => {
 
 // ============== INVOICE ROUTES ==============
 
-// ============== IMPROVED INVOICE NUMBER GENERATOR ==============
-
 // Helper function to generate unique invoice number
-function generateInvoiceNumber() {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  
-  // Use timestamp for uniqueness (last 6 digits of milliseconds since epoch)
-  const timestamp = Date.now().toString().slice(-6);
-  
-  // Add random component for extra safety
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  
-  // Format: INV-YYYYMMDD-XXXXXXRRR
-  // Example: INV-20260203-456789123
-  console.log(`INV-${year}${month}${day}-${timestamp}${random}`)
-  return `INV-${year}${month}${day}-${timestamp}${random}`;
+function generateInvoiceId() {
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `INV-${random}`;
 }
 
 // Display invoice list page
@@ -556,7 +541,7 @@ app.post("/api/invoices/create", async (req, res) => {
     const maxAttempts = 5;
     
     while (attempts < maxAttempts) {
-      invoiceId = generateInvoiceNumber();
+      invoiceId = generateInvoiceId();
       
       // Check if this invoice number already exists
       const existingInvoice = await Invoice.findOne({ invoiceId });

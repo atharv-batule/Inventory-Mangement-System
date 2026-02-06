@@ -90,7 +90,7 @@ const invoiceSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-invoiceSchema.index({ invoiceNumber: 1 });
+invoiceSchema.index({ invoiceId: 1 });
 invoiceSchema.index({ vendorId: 1 });
 invoiceSchema.index({ status: 1 });
 invoiceSchema.index({ createdAt: -1 });
