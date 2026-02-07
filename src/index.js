@@ -14,8 +14,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 const app = express();
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "../views"));
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +22,8 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "../views"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
