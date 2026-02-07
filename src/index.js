@@ -3,7 +3,7 @@ import express from "express";
 import mongoose from "mongoose";
 import connectDb from "../database/index.js";
 import bcrypt from "bcrypt";
-import path from "path";
+//import path from "path";
 import session from "express-session";
 import collection from "./registration.model.js";
 import productCollection from "./product.model.js";
@@ -14,6 +14,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "../views"));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 dotenv.config();

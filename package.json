@@ -4,7 +4,7 @@
   "description": "Login ",
   "main": "index.js",
   "type": "module",
-  "/api": "http://localhost:8000",
+  //"/api": "http://localhost:8000",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon -r dotenv/config  src/index.js",
