@@ -10,8 +10,14 @@ import productCollection from "./product.model.js";
 import Inventory from './Inventory.model.js';
 import Vendor from './vendor.model.js';
 import Invoice from './invoice.model.js'; // Import Invoice model
+import path from "path";
+import { fileURLToPath } from "url";
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "../views"));
 
-dotenv.config({ path: "./env" });
+
+dotenv.config();
+
 
 const app = express();
 
@@ -33,7 +39,7 @@ console.log("Server is starting...");
 connectDb();
 
 app.set("view engine", "ejs");
-app.set("views", "./views");
+//app.set("views", "./views");
 
 app.use(express.static("public"));
 
