@@ -49,15 +49,15 @@ app.use(express.static("public"));
 
 // ============== AUTHENTICATION ROUTES ==============
 
-app.get("/api/login", (req, res) => {
+app.get("/", (req, res) => {
   res.render("login");
 });
 
-app.get("/api/signup", (req, res) => {
+app.get("/signup", (req, res) => {
   res.render("signup");
 });
 
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const check = await collection.findOne({ email: req.body.email });
     if (!check) return res.send("User not found");
@@ -76,7 +76,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.post("/api/signup", async (req, res) => {
+app.post("/signup", async (req, res) => {
   console.log("Received POST request at signup");
   console.log("Request body", req.body);
 
@@ -94,7 +94,7 @@ app.post("/api/signup", async (req, res) => {
 
     const userdata = await collection.create(data);
     console.log("User Registered:", userdata);
-    res.redirect("/api/login");
+    res.redirect("/login");
   } catch (error) {
     console.error("Error during signup:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -102,14 +102,14 @@ app.post("/api/signup", async (req, res) => {
 });
 
 app.get("/home", (req, res) => {
-  if (!req.session.user) return res.redirect("/api/login");
+  if (!req.session.user) return res.redirect("/login");
   res.render("home", { user: req.session.user });
 });
 
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).send("Error logging out");
-    res.redirect("/api/login");
+    res.redirect("/login");
   });
 });
 
@@ -239,7 +239,7 @@ app.post('/delete-inventory/:id', async (req, res) => {
 // ============== INVENTORY API ROUTES ==============
 
 // Get all inventory items (API endpoint)
-app.get("/api/inventory", async (req, res) => {
+app.get("/inventory", async (req, res) => {
   try {
     const { category, lowStock, search } = req.query;
     
@@ -273,7 +273,7 @@ app.get("/api/inventory", async (req, res) => {
 });
 
 // Get single inventory item by ID (API endpoint)
-app.get("/api/inventory/:id", async (req, res) => {
+app.get("/inventory/:id", async (req, res) => {
   try {
     const item = await Inventory.findById(req.params.id);
     
@@ -289,7 +289,7 @@ app.get("/api/inventory/:id", async (req, res) => {
 });
 
 // Get inventory statistics (API endpoint)
-app.get("/api/inventory/stats/summary", async (req, res) => {
+app.get("/inventory/stats/summary", async (req, res) => {
   try {
     const allItems = await Inventory.find();
     
@@ -326,7 +326,7 @@ app.get("/api/inventory/stats/summary", async (req, res) => {
 });
 
 // Update inventory quantity (API endpoint) - useful for quick stock adjustments
-app.patch("/api/inventory/:id/quantity", async (req, res) => {
+app.patch("/inventory/:id/quantity", async (req, res) => {
   try {
     const { quantity } = req.body;
     
@@ -476,7 +476,7 @@ app.get("/invoice/view/:id", async (req, res) => {
 // ============== INVOICE API ROUTES ==============
 
 // Get all invoices (API endpoint)
-app.get("/api/invoices", async (req, res) => {
+app.get("/invoices", async (req, res) => {
   try {
     const { status, startDate, endDate, search } = req.query;
     
@@ -510,7 +510,7 @@ app.get("/api/invoices", async (req, res) => {
 });
 
 // Get single invoice by ID (API endpoint)
-app.get("/api/invoices/:id", async (req, res) => {
+app.get("/invoices/:id", async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) {
@@ -524,7 +524,7 @@ app.get("/api/invoices/:id", async (req, res) => {
 });
 
 // Get invoice statistics (API endpoint)
-app.get("/api/invoices/stats/summary", async (req, res) => {
+app.get("/invoices/stats/summary", async (req, res) => {
   try {
     const stats = await Invoice.getInvoiceStats();
     res.json(stats);
@@ -535,7 +535,7 @@ app.get("/api/invoices/stats/summary", async (req, res) => {
 });
 
 // Create new invoice - WITH DUPLICATE PREVENTION
-app.post("/api/invoices/create", async (req, res) => {
+app.post("/invoices/create", async (req, res) => {
   try {
     const { vendorId, status, items, subtotal, gstTotal, total, notes, dueDate } = req.body;
 
@@ -612,7 +612,7 @@ app.post("/api/invoices/create", async (req, res) => {
 });
 
 // Update invoice - FIXED VERSION
-app.put("/api/invoices/:id", async (req, res) => {
+app.put("/invoices/:id", async (req, res) => {
   try {
     const { status, items, subtotal, gstTotal, total, notes, dueDate } = req.body;
     
@@ -680,7 +680,7 @@ app.put("/api/invoices/:id", async (req, res) => {
 });
 
 // Update invoice status only
-app.patch("/api/invoices/:id/status", async (req, res) => {
+app.patch("/invoices/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
     
@@ -717,7 +717,7 @@ app.patch("/api/invoices/:id/status", async (req, res) => {
 });
 
 // Delete invoice
-app.delete("/api/invoices/:id", async (req, res) => {
+app.delete("/invoices/:id", async (req, res) => {
   try {
     const invoice = await Invoice.findByIdAndDelete(req.params.id);
     
@@ -734,7 +734,7 @@ app.delete("/api/invoices/:id", async (req, res) => {
 });
 
 // Duplicate/Clone invoice - WITH DUPLICATE PREVENTION
-app.post("/api/invoices/:id/duplicate", async (req, res) => {
+app.post("/invoices/:id/duplicate", async (req, res) => {
   try {
     const originalInvoice = await Invoice.findById(req.params.id);
     
@@ -805,7 +805,7 @@ app.post("/api/invoices/:id/duplicate", async (req, res) => {
 });
 
 // Export invoice to PDF (placeholder - you'll need to implement PDF generation)
-app.get("/api/invoices/:id/export/pdf", async (req, res) => {
+app.get("/invoices/:id/export/pdf", async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     
@@ -826,7 +826,7 @@ app.get("/api/invoices/:id/export/pdf", async (req, res) => {
 
 // ============== API ENDPOINTS FOR VENDORS AND PRODUCTS ==============
 
-app.get("/api/vendors", async (req, res) => {
+app.get("/vendors", async (req, res) => {
   try {
     const vendors = await Vendor.find();
     res.json(vendors);
@@ -836,7 +836,7 @@ app.get("/api/vendors", async (req, res) => {
   }
 });
 
-app.get("/api/products", async (req, res) => {
+app.get("/products", async (req, res) => {
   try {
     const products = await productCollection.find();
     res.json(products);
