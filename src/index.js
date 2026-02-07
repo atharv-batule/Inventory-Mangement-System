@@ -878,8 +878,8 @@ app.post('/delete-product/:id', async (req, res) => {
 
 // ============== SERVER START ==============
 
-//const port = process.env.PORT || 8001;
-const port=8001;
+const port = process.env.PORT || 8001;
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
