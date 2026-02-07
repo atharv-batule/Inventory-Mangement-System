@@ -406,31 +406,17 @@ app.post('/update-vendor', async (req, res) => {
 
 // ============== INVOICE ROUTES ==============
 
-// ============== IMPROVED INVOICE NUMBER GENERATOR ==============
-
 // Helper function to generate unique invoice number
-function generateInvoiceNumber() {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  
-  // Use timestamp for uniqueness (last 6 digits of milliseconds since epoch)
-  const timestamp = Date.now().toString().slice(-6);
-  
-  // Add random component for extra safety
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  
-  // Format: INV-YYYYMMDD-XXXXXXRRR
-  // Example: INV-20260203-456789123
-  return `INV-${year}${month}${day}-${timestamp}${random}`;
+function generateInvoiceId() {
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `INV-${random}`;
 }
 
 // Display invoice list page
 app.get("/invoice", async (req, res) => {
   try {
     const invoices = await Invoice.find().sort({ createdAt: -1 });
-    res.render("invoice-list", { invoices });
+    res.render("invoice", { invoices });  // Renders invoice.ejs
   } catch (error) {
     console.error("Error loading invoices:", error);
     res.status(500).send("Error loading invoices page");
@@ -440,7 +426,7 @@ app.get("/invoice", async (req, res) => {
 // Display invoice creation page
 app.get("/invoice/create", async (req, res) => {
   try {
-    res.render("invoice-create");
+    res.render("invoice-create");  // Renders invoice-create.ejs
   } catch (error) {
     console.error("Error loading invoice creation page:", error);
     res.status(500).send("Error loading page");
@@ -454,26 +440,28 @@ app.get("/invoice/edit/:id", async (req, res) => {
     if (!invoice) {
       return res.status(404).send("Invoice not found");
     }
-    res.render("invoice-edit", { invoice });
+    res.render("invoice-edit", { invoice });  // Renders invoice-edit.ejs
   } catch (error) {
     console.error("Error loading invoice edit page:", error);
     res.status(500).send("Error loading page");
   }
 });
 
-// Display invoice detail/view page (optional)
+// Display invoice detail/view page
 app.get("/invoice/view/:id", async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) {
       return res.status(404).send("Invoice not found");
     }
-    res.render("invoice-view", { invoice }); // You'll need to create this view
+    res.render("invoice-view", { invoice });  // Renders invoice-view.ejs
   } catch (error) {
     console.error("Error loading invoice view page:", error);
     res.status(500).send("Error loading page");
   }
 });
+
+
 
 // ============== INVOICE API ROUTES ==============
 
@@ -497,7 +485,7 @@ app.get("/api/invoices", async (req, res) => {
     
     if (search) {
       query.$or = [
-        { invoiceNumber: { $regex: search, $options: 'i' } },
+        { invoiceId: { $regex: search, $options: 'i' } },
         { vendorName: { $regex: search, $options: 'i' } },
         { vendorEmail: { $regex: search, $options: 'i' } }
       ];
@@ -548,15 +536,15 @@ app.post("/api/invoices/create", async (req, res) => {
     }
 
     // Generate unique invoice number with retry logic
-    let invoiceNumber;
+    let invoiceId;
     let attempts = 0;
     const maxAttempts = 5;
     
     while (attempts < maxAttempts) {
-      invoiceNumber = generateInvoiceNumber();
+      invoiceId = generateInvoiceId();
       
       // Check if this invoice number already exists
-      const existingInvoice = await Invoice.findOne({ invoiceNumber });
+      const existingInvoice = await Invoice.findOne({ invoiceId });
       
       if (!existingInvoice) {
         // Unique number found, break the loop
@@ -579,7 +567,7 @@ app.post("/api/invoices/create", async (req, res) => {
 
     // Create invoice
     const invoice = await Invoice.create({
-      invoiceNumber,
+      invoiceId,
       vendorId,
       vendorName: vendor.name,
       vendorEmail: vendor.email,
@@ -593,7 +581,7 @@ app.post("/api/invoices/create", async (req, res) => {
       dueDate: dueDate ? new Date(dueDate) : null
     });
 
-    console.log("Invoice created successfully:", invoiceNumber);
+    console.log("Invoice created successfully:", invoiceId);
     res.status(201).json({ message: "Invoice created successfully", invoice });
   } catch (error) {
     console.error("Error creating invoice:", error);
@@ -661,7 +649,7 @@ app.put("/api/invoices/:id", async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
-    console.log("Invoice updated successfully:", invoice.invoiceNumber);
+    console.log("Invoice updated successfully:", invoice.invoiceId);
     res.json({ message: "Invoice updated successfully", invoice });
   } catch (error) {
     console.error("Error updating invoice:", error);
@@ -727,7 +715,7 @@ app.delete("/api/invoices/:id", async (req, res) => {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
-    console.log("Invoice deleted:", invoice.invoiceNumber);
+    console.log("Invoice deleted:", invoice.invoiceId);
     res.json({ message: "Invoice deleted successfully" });
   } catch (error) {
     console.error("Error deleting invoice:", error);
@@ -745,14 +733,14 @@ app.post("/api/invoices/:id/duplicate", async (req, res) => {
     }
 
     // Generate unique invoice number with retry logic
-    let newInvoiceNumber;
+    let newInvoiceId;
     let attempts = 0;
     const maxAttempts = 5;
     
     while (attempts < maxAttempts) {
-      newInvoiceNumber = generateInvoiceNumber();
+      newInvoiceId = generateInvoiceNumber();
       
-      const existingInvoice = await Invoice.findOne({ invoiceNumber: newInvoiceNumber });
+      const existingInvoice = await Invoice.findOne({ invoiceId: newInvoiceId });
       
       if (!existingInvoice) {
         break;
@@ -771,7 +759,7 @@ app.post("/api/invoices/:id/duplicate", async (req, res) => {
     }
     
     const duplicateInvoice = await Invoice.create({
-      invoiceNumber: newInvoiceNumber,
+      invoiceId: newInvoiceId,
       vendorId: originalInvoice.vendorId,
       vendorName: originalInvoice.vendorName,
       vendorEmail: originalInvoice.vendorEmail,
@@ -784,7 +772,7 @@ app.post("/api/invoices/:id/duplicate", async (req, res) => {
       notes: originalInvoice.notes
     });
 
-    console.log("Invoice duplicated successfully:", newInvoiceNumber);
+    console.log("Invoice duplicated successfully:", newInvoiceId);
     res.status(201).json({ 
       message: "Invoice duplicated successfully", 
       invoice: duplicateInvoice 

@@ -3,39 +3,282 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>Login - Inventory Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     body {
-      background: linear-gradient(-30deg, rgb(199, 137, 147), #76032f, rgb(6, 6, 101), rgb(244, 244, 237));
-      background-size: 400% 400%;
-      animation: gradientBG 3s ease infinite;
+      font-family: 'Inter', sans-serif;
     }
 
-    @keyframes gradientBG {
-      0% { background-position: 0% 80%; }
-      50% { background-position: 100% 20%; }
-      100% { background-position: 0% 80%; }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .input-focus:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .floating-shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: float 20s infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      left: 15%;
+      top: 20%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      right: 10%;
+      top: 60%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 80px;
+      height: 80px;
+      left: 60%;
+      top: 30%;
+      animation-delay: 4s;
+    }
+
+    .shape:nth-child(4) {
+      width: 120px;
+      height: 120px;
+      left: 20%;
+      bottom: 20%;
+      animation-delay: 6s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translateY(-80px) rotate(180deg);
+        opacity: 0.8;
+      }
+    }
+
+    .feature-icon {
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.1) rotate(5deg);
     }
   </style>
 </head>
-<body class="flex items-center justify-center h-screen">
-  <div class="w-full max-w-md bg-white p-8 rounded shadow-md">
-    <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
-    <form action="/api/login" method="POST">
-      <div class="mb-4">
-        <label class="block text-gray-700 mb-2" for="email">Email</label>
-        <input type="email" id="email" name="email" class="w-full p-2 border border-gray-300 rounded" required>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+  
+  <!-- Floating Background Shapes -->
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="w-full max-w-5xl relative z-10">
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      
+      <!-- Left Side - Welcome Section -->
+      <div class="hidden md:block text-white space-y-6">
+        <div class="inline-block p-4 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm">
+          <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+        </div>
+        
+        <h1 class="text-5xl font-bold leading-tight">
+          Welcome Back to<br/>
+          <span class="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">Inventory Pro</span>
+        </h1>
+        
+        <p class="text-xl text-white text-opacity-90">
+          Manage your products, track inventory, and grow your business with our powerful management system.
+        </p>
+
+        <!-- Feature Cards -->
+        <div class="space-y-4 pt-4">
+          <div class="feature-card flex items-start space-x-4 bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+            <div class="feature-icon p-3 bg-white bg-opacity-20 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg">Real-time Tracking</h3>
+              <p class="text-white text-opacity-80 text-sm">Monitor your inventory in real-time</p>
+            </div>
+          </div>
+
+          <div class="feature-card flex items-start space-x-4 bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+            <div class="feature-icon p-3 bg-white bg-opacity-20 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg">Secure & Reliable</h3>
+              <p class="text-white text-opacity-80 text-sm">Your data is safe with us</p>
+            </div>
+          </div>
+
+          <div class="feature-card flex items-start space-x-4 bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
+            <div class="feature-icon p-3 bg-white bg-opacity-20 rounded-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg">Lightning Fast</h3>
+              <p class="text-white text-opacity-80 text-sm">Optimized for performance</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 mb-2" for="password">Password</label>
-        <input type="password" id="password" name="password" class="w-full p-2 border border-gray-300 rounded" required>
+
+      <!-- Right Side - Login Form -->
+      <div class="glass-effect rounded-3xl shadow-2xl p-8 md:p-10">
+        <!-- Mobile Logo (visible only on mobile) -->
+        <div class="md:hidden text-center mb-6">
+          <div class="inline-block p-3 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-lg mb-3">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-800">Inventory Pro</h1>
+        </div>
+
+        <h2 class="text-3xl font-bold mb-2 text-slate-800">Login</h2>
+        <p class="text-slate-600 mb-8">Welcome back! Please login to your account</p>
+        
+        <form action="/api/login" method="POST">
+          
+          <!-- Email Field -->
+          <div class="mb-6">
+            <label class="block text-slate-700 font-semibold mb-2" for="email">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <span>Email Address</span>
+              </div>
+            </label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="w-full p-3 border-2 border-slate-300 rounded-xl input-focus transition-all" 
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <!-- Password Field -->
+          <div class="mb-6">
+            <label class="block text-slate-700 font-semibold mb-2" for="password">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                  <span>Password</span>
+                </div>
+              </div>
+            </label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="w-full p-3 border-2 border-slate-300 rounded-xl input-focus transition-all" 
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <!-- Remember Me Checkbox -->
+          <div class="flex items-center mb-6">
+            <input 
+              type="checkbox" 
+              id="remember" 
+              class="w-4 h-4 text-purple-600 border-slate-300 rounded focus:ring-purple-500"
+            />
+            <label for="remember" class="ml-2 text-sm text-slate-600">
+              Remember me for 30 days
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            type="submit" 
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl hover:shadow-xl transition-all font-semibold text-lg transform hover:scale-[1.02] mb-6"
+          >
+            Login to Account
+          </button>
+
+          <!-- Divider -->
+          <div class="relative mb-6">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-slate-300"></div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Sign Up Link -->
+        <div class="text-center">
+          <p class="text-slate-600">
+            Don't have an account?
+            <a href="/api/signup" class="text-purple-600 hover:text-purple-700 font-semibold hover:underline ml-1">
+              Sign up for free
+            </a>
+          </p>
+        </div>
       </div>
-      <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Login</button>
-    </form>
-    <p class="mt-4 text-center text-gray-600">
-      Don't have an account? <a href="/api/signup" class="text-blue-500 hover:underline">Sign Up</a>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-white text-opacity-80 mt-8 text-sm">
+      © 2026 Inventory Pro. All rights reserved.
     </p>
   </div>
+
 </body>
 </html>

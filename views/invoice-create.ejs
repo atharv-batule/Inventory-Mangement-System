@@ -1,3 +1,5 @@
+<!--invoice-create.ejs-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,18 +22,18 @@
     <div class="max-w-7xl mx-auto px-6 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <button onclick="window.location.href='/invoice'" class="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+          <a href="/invoice" class="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
             <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
             <span class="text-slate-700 font-medium">Back to Invoices</span>
-          </button>
+          </a>
           
           <div class="h-8 w-px bg-slate-300"></div>
           
           <div>
             <h1 class="text-2xl font-bold text-slate-800">Create New Invoice</h1>
-            <p class="text-xs text-slate-500">Fill in the details to generate an invoice</p>
+            <p class="text-xs text-slate-500">Fill in the details below</p>
           </div>
         </div>
       </div>
@@ -39,301 +41,461 @@
   </nav>
 
   <!-- Main Content -->
-  <div class="max-w-7xl mx-auto px-6 py-8">
-    <form id="invoice-form">
-      <!-- Vendor Information Section -->
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden mb-6">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-slate-200">
-          <h3 class="text-lg font-semibold text-slate-800 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    <div class="bg-white rounded-xl shadow-md border border-slate-200 p-8">
+      <form id="invoiceForm">
+        
+        <!-- Vendor Information -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
             Vendor Information
           </h3>
-        </div>
-        
-        <div class="p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">Select Vendor *</label>
-            <select id="vendor" name="vendorId" required class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white">
-              <option value="">-- Select Vendor --</option>
-            </select>
-          </div>
           
-          <div id="vendor-details" class="bg-slate-50 p-4 rounded-lg space-y-2" style="display: none;">
-            <p class="text-sm"><span class="font-semibold text-slate-700">Email:</span> <span id="vendor-email" class="text-slate-600"></span></p>
-            <p class="text-sm"><span class="font-semibold text-slate-700">GST ID:</span> <span id="vendor-gst" class="text-slate-600 font-mono"></span></p>
-            <p class="text-sm"><span class="font-semibold text-slate-700">Contact:</span> <span id="vendor-contact" class="text-slate-600"></span></p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor *</label>
+              <select 
+                id="vendorSelect" 
+                class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+                onchange="loadVendorDetails()"
+              >
+                <option value="">Select Vendor</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor Email</label>
+              <input 
+                type="email" 
+                id="vendorEmail" 
+                class="w-full p-3 border border-slate-300 rounded-lg bg-slate-50" 
+                readonly
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Vendor GST ID</label>
+              <input 
+                type="text" 
+                id="vendorGstId" 
+                class="w-full p-3 border border-slate-300 rounded-lg bg-slate-50" 
+                readonly
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Invoice Status *</label>
+              <select 
+                id="invoiceStatus" 
+                class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              >
+                <option value="Draft">Draft</option>
+                <option value="Sent">Sent</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">Invoice Status *</label>
-            <select id="status" name="status" required class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white">
-              <option value="Draft">Draft</option>
-              <option value="Sent">Sent</option>
-              <option value="Paid">Paid</option>
-            </select>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Due Date</label>
+              <input 
+                type="date" 
+                id="dueDate" 
+                class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Notes</label>
+              <input 
+                type="text" 
+                id="notes" 
+                placeholder="Additional notes (optional)"
+                class="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Invoice Items Section -->
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden mb-6">
-        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-blue-50 border-b border-slate-200">
-          <h3 class="text-lg font-semibold text-slate-800 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-            </svg>
-            Invoice Items
-          </h3>
-        </div>
-        
-        <div class="p-6">
+        <!-- Invoice Items -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-slate-800 flex items-center">
+              <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              Invoice Items
+            </h3>
+            <button 
+              type="button" 
+              onclick="addItemRow()" 
+              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>Add Item</span>
+            </button>
+          </div>
+
           <div class="overflow-x-auto">
-            <table id="items-table" class="w-full border border-slate-200 rounded-lg overflow-hidden">
-              <thead class="bg-gradient-to-r from-blue-600 to-purple-600">
-                <tr>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Product ID</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Product Name</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-white uppercase">Quantity</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-white uppercase">Rate (₹)</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-white uppercase">GST %</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-white uppercase">Amount (₹)</th>
-                  <th class="px-4 py-3 text-center text-xs font-semibold text-white uppercase">Action</th>
+            <table class="w-full">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200">
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Product</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Quantity</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Rate (₹)</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">GST (%)</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Amount (₹)</th>
+                  <th class="px-4 py-3 text-center text-sm font-semibold text-slate-700">Action</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-200"></tbody>
+              <tbody id="itemsTableBody">
+                <!-- Items will be added here dynamically -->
+              </tbody>
             </table>
           </div>
-          
-          <button type="button" onclick="addItemRow()" class="mt-4 flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <span>Add Item</span>
-          </button>
-        </div>
-      </div>
 
-      <!-- Invoice Summary Section -->
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden mb-6">
-        <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-slate-200">
-          <h3 class="text-lg font-semibold text-slate-800 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Invoice Summary
-          </h3>
+          <div class="mt-4 text-sm text-slate-500 italic">
+            * Click "Add Item" to add products to this invoice
+          </div>
         </div>
-        
-        <div class="p-6">
-          <div class="bg-gradient-to-r from-slate-50 to-slate-100 p-6 rounded-lg border border-slate-200 space-y-3">
-            <div class="flex justify-between text-slate-700">
-              <span class="font-medium">Subtotal:</span>
-              <span class="font-semibold">₹<span id="subtotal">0.00</span></span>
+
+        <!-- Invoice Summary -->
+        <div class="bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-6 border border-slate-200">
+          <h3 class="text-lg font-bold text-slate-800 mb-4">Invoice Summary</h3>
+          
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600">Subtotal:</span>
+              <span class="font-semibold text-slate-800">₹<span id="subtotalDisplay">0.00</span></span>
             </div>
-            <div class="flex justify-between text-slate-700">
-              <span class="font-medium">Total GST:</span>
-              <span class="font-semibold">₹<span id="gst-total">0.00</span></span>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-600">GST Total:</span>
+              <span class="font-semibold text-slate-800">₹<span id="gstTotalDisplay">0.00</span></span>
             </div>
-            <div class="border-t-2 border-slate-300 pt-3">
-              <div class="flex justify-between text-2xl font-bold text-green-600">
-                <span>Grand Total:</span>
-                <span>₹<span id="total">0.00</span></span>
-              </div>
+            <div class="border-t border-slate-300 pt-3 flex justify-between items-center">
+              <span class="text-lg font-bold text-slate-800">Total Amount:</span>
+              <span class="text-2xl font-bold text-indigo-600">₹<span id="totalDisplay">0.00</span></span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Action Buttons -->
-      <div class="flex justify-end gap-4">
-        <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold flex items-center space-x-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          <span>Create Invoice</span>
-        </button>
-      </div>
-    </form>
+        <!-- Form Actions -->
+        <div class="flex justify-end gap-3 mt-8">
+          <a 
+            href="/invoice" 
+            class="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+          >
+            Cancel
+          </a>
+          <button 
+            type="submit" 
+            class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+          >
+            Create Invoice
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script>
     let vendors = [];
     let products = [];
+    let itemCounter = 0;
 
-    window.onload = async () => {
-      try {
-        const vendorRes = await fetch('/api/vendors');
-        vendors = await vendorRes.json();
-        const vendorSelect = document.getElementById('vendor');
-        vendors.forEach(v => {
-          vendorSelect.innerHTML += `<option value="${v.vendorId}">${v.name}</option>`;
-        });
-
-        const productRes = await fetch('/api/products');
-        products = await productRes.json();
-        
-        addItemRow();
-      } catch (err) {
-        alert("Failed to load vendors or products.");
-        console.error(err);
-      }
-    };
-
-    document.getElementById('vendor').addEventListener('change', function () {
-      const vendor = vendors.find(v => v.vendorId === this.value);
-      const detailsDiv = document.getElementById('vendor-details');
-      
-      if (vendor) {
-        document.getElementById('vendor-email').textContent = vendor.email || 'N/A';
-        document.getElementById('vendor-gst').textContent = vendor.gstId || 'N/A';
-        document.getElementById('vendor-contact').textContent = vendor.contact || 'N/A';
-        detailsDiv.style.display = 'block';
-      } else {
-        detailsDiv.style.display = 'none';
-      }
+    // Load vendors and products on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadVendors();
+      await loadProducts();
+      addItemRow(); // Add first item row by default
     });
 
+    // Load vendors from API
+    async function loadVendors() {
+      try {
+        const response = await fetch('/api/vendors');
+        vendors = await response.json();
+        
+        const vendorSelect = document.getElementById('vendorSelect');
+        vendors.forEach(vendor => {
+          const option = document.createElement('option');
+          option.value = vendor.vendorId;
+          option.textContent = `${vendor.name} (${vendor.vendorId})`;
+          option.dataset.email = vendor.email;
+          option.dataset.gstId = vendor.gstId;
+          option.dataset.name = vendor.name;
+          vendorSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading vendors:', error);
+        alert('Failed to load vendors');
+      }
+    }
+
+    // Load products from API
+    async function loadProducts() {
+      try {
+        const response = await fetch('/api/products');
+        products = await response.json();
+      } catch (error) {
+        console.error('Error loading products:', error);
+        alert('Failed to load products');
+      }
+    }
+
+    // Load vendor details when selected
+    function loadVendorDetails() {
+      const vendorSelect = document.getElementById('vendorSelect');
+      const selectedOption = vendorSelect.options[vendorSelect.selectedIndex];
+      
+      if (selectedOption.value) {
+        document.getElementById('vendorEmail').value = selectedOption.dataset.email || '';
+        document.getElementById('vendorGstId').value = selectedOption.dataset.gstId || '';
+      } else {
+        document.getElementById('vendorEmail').value = '';
+        document.getElementById('vendorGstId').value = '';
+      }
+    }
+
+    // Add new item row
     function addItemRow() {
+      const tbody = document.getElementById('itemsTableBody');
       const row = document.createElement('tr');
-      row.className = 'hover:bg-slate-50';
+      row.className = 'border-b border-slate-200 item-row';
+      row.dataset.itemId = itemCounter++;
+      
       row.innerHTML = `
         <td class="px-4 py-3">
-          <select class="product-select w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-            <option value="">-- Select Product --</option>
-            ${products.map(p => `<option value="${p.product_id}">${p.product_id}</option>`).join('')}
+          <select 
+            class="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 product-select"
+            onchange="updateItemRow(this)"
+            required
+          >
+            <option value="">Select Product</option>
+            ${products.map(p => `
+              <option 
+                value="${p.product_id}" 
+                data-name="${p.name}" 
+                data-price="${p.price}" 
+                data-gst="${p.gst}"
+              >
+                ${p.name} (${p.product_id})
+              </option>
+            `).join('')}
           </select>
         </td>
-        <td class="px-4 py-3 text-sm text-slate-700 pname">-</td>
         <td class="px-4 py-3">
-          <input type="number" class="qty w-20 p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-right" min="1" value="1" required>
+          <input 
+            type="number" 
+            min="1" 
+            value="1" 
+            class="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 quantity-input"
+            onchange="calculateItemAmount(this)"
+            required
+          />
         </td>
-        <td class="px-4 py-3 text-sm text-slate-700 text-right rate">0.00</td>
-        <td class="px-4 py-3 text-sm text-slate-700 text-right gst">0</td>
-        <td class="px-4 py-3 text-sm font-semibold text-slate-800 text-right amount">0.00</td>
+        <td class="px-4 py-3">
+          <input 
+            type="number" 
+            step="0.01" 
+            min="0" 
+            value="0" 
+            class="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 rate-input"
+            onchange="calculateItemAmount(this)"
+            required
+          />
+        </td>
+        <td class="px-4 py-3">
+          <input 
+            type="number" 
+            step="0.01" 
+            min="0" 
+            value="0" 
+            class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 gst-input"
+            readonly
+          />
+        </td>
+        <td class="px-4 py-3">
+          <input 
+            type="number" 
+            step="0.01" 
+            min="0" 
+            value="0" 
+            class="w-full p-2 border border-slate-300 rounded-lg bg-slate-50 amount-input font-semibold"
+            readonly
+          />
+        </td>
         <td class="px-4 py-3 text-center">
-          <button type="button" onclick="removeRow(this)" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm">
-            Remove
+          <button 
+            type="button" 
+            onclick="removeItemRow(this)" 
+            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
           </button>
         </td>
       `;
       
-      document.querySelector('#items-table tbody').appendChild(row);
-      
-      row.querySelector('.product-select').addEventListener('change', e => updateProductDetails(e.target));
-      row.querySelector('.qty').addEventListener('input', calcTotals);
+      tbody.appendChild(row);
     }
 
-    function removeRow(btn) {
-      btn.closest('tr').remove();
-      calcTotals();
-    }
-
-    function updateProductDetails(select) {
-      const row = select.closest('tr');
-      const prod = products.find(p => p.product_id === select.value);
+    // Update item row when product is selected
+    function updateItemRow(selectElement) {
+      const row = selectElement.closest('tr');
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
       
-      if (prod) {
-        row.querySelector('.pname').textContent = prod.name;
-        row.querySelector('.rate').textContent = parseFloat(prod.price).toFixed(2);
-        row.querySelector('.gst').textContent = prod.gst;
-        calcTotals();
-      } else {
-        row.querySelector('.pname').textContent = '-';
-        row.querySelector('.rate').textContent = '0.00';
-        row.querySelector('.gst').textContent = '0';
-        row.querySelector('.amount').textContent = '0.00';
+      if (selectedOption.value) {
+        const rate = parseFloat(selectedOption.dataset.price);
+        const gst = parseFloat(selectedOption.dataset.gst);
+        
+        row.querySelector('.rate-input').value = rate.toFixed(2);
+        row.querySelector('.gst-input').value = gst.toFixed(2);
+        
+        calculateItemAmount(selectElement);
       }
     }
 
-    function calcTotals() {
-      let subtotal = 0, gstTotal = 0;
+    // Calculate amount for a specific item
+    function calculateItemAmount(element) {
+      const row = element.closest('tr');
+      const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+      const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+      const gst = parseFloat(row.querySelector('.gst-input').value) || 0;
       
-      document.querySelectorAll('#items-table tbody tr').forEach(row => {
-        const qty = parseFloat(row.querySelector('.qty').value || 0);
-        const rate = parseFloat(row.querySelector('.rate').textContent || 0);
-        const gst = parseFloat(row.querySelector('.gst').textContent || 0);
-
-        const amt = rate * qty;
-        const gstAmt = amt * gst / 100;
-        const totalAmt = amt + gstAmt;
-        
-        row.querySelector('.amount').textContent = totalAmt.toFixed(2);
-
-        subtotal += amt;
-        gstTotal += gstAmt;
-      });
-
-      document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-      document.getElementById('gst-total').textContent = gstTotal.toFixed(2);
-      document.getElementById('total').textContent = (subtotal + gstTotal).toFixed(2);
+      const subtotal = quantity * rate;
+      const gstAmount = (subtotal * gst) / 100;
+      const total = subtotal + gstAmount;
+      
+      row.querySelector('.amount-input').value = total.toFixed(2);
+      
+      calculateInvoiceTotals();
     }
 
-    document.getElementById('invoice-form').addEventListener('submit', async (e) => {
+    // Calculate invoice totals
+    function calculateInvoiceTotals() {
+      const rows = document.querySelectorAll('.item-row');
+      let subtotal = 0;
+      let gstTotal = 0;
+      
+      rows.forEach(row => {
+        const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+        const gst = parseFloat(row.querySelector('.gst-input').value) || 0;
+        
+        const itemSubtotal = quantity * rate;
+        const itemGst = (itemSubtotal * gst) / 100;
+        
+        subtotal += itemSubtotal;
+        gstTotal += itemGst;
+      });
+      
+      const total = subtotal + gstTotal;
+      
+      document.getElementById('subtotalDisplay').textContent = subtotal.toFixed(2);
+      document.getElementById('gstTotalDisplay').textContent = gstTotal.toFixed(2);
+      document.getElementById('totalDisplay').textContent = total.toFixed(2);
+    }
+
+    // Remove item row
+    function removeItemRow(button) {
+      const row = button.closest('tr');
+      const tbody = document.getElementById('itemsTableBody');
+      
+      if (tbody.children.length > 1) {
+        row.remove();
+        calculateInvoiceTotals();
+      } else {
+        alert('Invoice must have at least one item');
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('invoiceForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const vendorId = document.getElementById('vendor').value;
-      const status = document.getElementById('status').value;
+      const vendorSelect = document.getElementById('vendorSelect');
+      const selectedVendor = vendorSelect.options[vendorSelect.selectedIndex];
       
-      if (!vendorId) {
+      if (!selectedVendor.value) {
         alert('Please select a vendor');
+        return;
+      }
+
+      const rows = document.querySelectorAll('.item-row');
+      if (rows.length === 0) {
+        alert('Please add at least one item');
         return;
       }
 
       const items = [];
       let isValid = true;
-      
-      document.querySelectorAll('#items-table tbody tr').forEach(row => {
-        const product_id = row.querySelector('.product-select').value;
-        const quantity = parseFloat(row.querySelector('.qty').value);
+
+      rows.forEach(row => {
+        const productSelect = row.querySelector('.product-select');
+        const selectedProduct = productSelect.options[productSelect.selectedIndex];
         
-        if (!product_id || !quantity) {
+        if (!selectedProduct.value) {
           isValid = false;
           return;
         }
-        
+
         items.push({
-          product_id,
-          productName: row.querySelector('.pname').textContent,
-          quantity,
-          rate: parseFloat(row.querySelector('.rate').textContent),
-          gst: parseFloat(row.querySelector('.gst').textContent),
-          amount: parseFloat(row.querySelector('.amount').textContent)
+          product_id: selectedProduct.value,
+          productName: selectedProduct.dataset.name,
+          quantity: parseFloat(row.querySelector('.quantity-input').value),
+          rate: parseFloat(row.querySelector('.rate-input').value),
+          gst: parseFloat(row.querySelector('.gst-input').value),
+          amount: parseFloat(row.querySelector('.amount-input').value)
         });
       });
 
-      if (!isValid || items.length === 0) {
-        alert('Please add at least one valid item');
+      if (!isValid) {
+        alert('Please select a product for all items');
         return;
       }
 
       const invoiceData = {
-        vendorId,
-        status,
-        items,
-        subtotal: parseFloat(document.getElementById('subtotal').textContent),
-        gstTotal: parseFloat(document.getElementById('gst-total').textContent),
-        total: parseFloat(document.getElementById('total').textContent)
+        vendorId: selectedVendor.value,
+        vendorName: selectedVendor.dataset.name,
+        vendorEmail: document.getElementById('vendorEmail').value,
+        vendorGstId: document.getElementById('vendorGstId').value,
+        status: document.getElementById('invoiceStatus').value,
+        dueDate: document.getElementById('dueDate').value || null,
+        notes: document.getElementById('notes').value,
+        items: items,
+        subtotal: parseFloat(document.getElementById('subtotalDisplay').textContent),
+        gstTotal: parseFloat(document.getElementById('gstTotalDisplay').textContent),
+        total: parseFloat(document.getElementById('totalDisplay').textContent)
       };
 
       try {
-        const res = await fetch('/api/invoices/create', {
+        const response = await fetch('/api/invoices/create', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(invoiceData)
         });
 
-        if (res.ok) {
+        if (response.ok) {
           alert('Invoice created successfully!');
           window.location.href = '/invoice';
         } else {
-          const error = await res.json();
+          const error = await response.json();
           alert('Failed to create invoice: ' + (error.message || 'Unknown error'));
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Failed to create invoice. Please try again.');
+        alert('An error occurred while creating the invoice');
       }
     });
   </script>
