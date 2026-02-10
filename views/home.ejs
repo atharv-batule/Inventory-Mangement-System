@@ -59,6 +59,10 @@
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       }
 
+      .card-gradient-purple {
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      }
+
       .sidebar-gradient {
         background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
       }
@@ -603,7 +607,57 @@
               </div>
             </div>
           </div>
+
+           <!-- Orders Card -->
+        <a href="/orders" class="stat-card">
+          <div
+            class="card-gradient-purple rounded-2xl p-6 text-white shadow-lg"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <div class="icon-wrapper p-3 rounded-xl">
+                <svg
+                  class="w-8 h-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  ></path>
+                </svg>
+              </div>
+              <div class="text-right">
+                <p class="text-5xl font-bold" id="total-orders">0</p>
+              </div>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold mb-1">Orders</h3>
+              <p class="text-white/80 text-sm">Total orders placed</p>
+            </div>
+            <div class="mt-4 flex items-center text-sm">
+              <span class="text-white/90">View all orders</span>
+              <svg
+                class="w-4 h-4 ml-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                ></path>
+              </svg>
+            </div>
+          </div>
+        </a>
         </div>
+
+        
 
         <!-- Quick Actions -->
         <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">

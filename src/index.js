@@ -10,6 +10,7 @@ import productCollection from "./product.model.js";
 import Inventory from './Inventory.model.js';
 import Vendor from './vendor.model.js';
 import Invoice from './invoice.model.js'; // Import Invoice model
+import Order from './orders.model.js'; // Import Order model
 import path from "path";
 import { fileURLToPath } from "url";
 const app = express();
@@ -845,6 +846,210 @@ app.get("/products", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
+
+// ============== ORDER ROUTES ==============
+
+// Display orders page
+app.get("/orders", async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ order_date: -1 });
+    res.render("orders", { orders });
+  } catch (error) {
+    console.error("Error loading orders:", error);
+    res.status(500).send("Error loading orders page");
+  }
+});
+
+// Add new order
+app.post('/add-order', async (req, res) => {
+  const { 
+    order_id, 
+    customer_name, 
+    customer_email, 
+    customer_phone,
+    product_name,
+    quantity,
+    unit_price,
+    total_amount,
+    status,
+    payment_method,
+    shipping_address,
+    notes
+  } = req.body;
+  
+  try {
+    // Check if order_id already exists
+    const existingOrder = await Order.findOne({ order_id });
+    if (existingOrder) {
+      return res.status(400).send('Order ID already exists');
+    }
+
+    await Order.create({ 
+      order_id,
+      customer_name,
+      customer_email,
+      customer_phone,
+      product_name,
+      quantity: parseInt(quantity),
+      unit_price: parseFloat(unit_price),
+      total_amount: parseFloat(total_amount),
+      status,
+      payment_method,
+      shipping_address,
+      notes: notes || ''
+    });
+    
+    res.redirect('/orders');
+  } catch (error) {
+    console.error('Error adding order:', error);
+    res.status(500).send('Error adding order');
+  }
+});
+
+// Update order
+app.post('/update-order', async (req, res) => {
+  const { 
+    orderId,
+    order_id,
+    customer_name, 
+    customer_email, 
+    customer_phone,
+    product_name,
+    quantity,
+    unit_price,
+    total_amount,
+    status,
+    payment_method,
+    shipping_address,
+    notes
+  } = req.body;
+  
+  try {
+    // Check if trying to update to an order_id that already exists (but not the same order)
+    const existingOrder = await Order.findOne({ 
+      order_id, 
+      _id: { $ne: orderId } 
+    });
+    
+    if (existingOrder) {
+      return res.status(400).send('Order ID already exists');
+    }
+
+    const updateData = {
+      order_id,
+      customer_name,
+      customer_email,
+      customer_phone,
+      product_name,
+      quantity: parseInt(quantity),
+      unit_price: parseFloat(unit_price),
+      total_amount: parseFloat(total_amount),
+      status,
+      payment_method,
+      shipping_address,
+      notes: notes || ''
+    };
+
+    // If status is being changed to Delivered, set delivery date
+    if (status === 'Delivered') {
+      updateData.delivery_date = new Date();
+    }
+
+    await Order.findByIdAndUpdate(
+      orderId,
+      updateData,
+      { new: true, runValidators: true }
+    );
+    
+    res.redirect('/orders');
+  } catch (error) {
+    console.error('Error updating order:', error);
+    res.status(500).send('Error updating order');
+  }
+});
+
+// Delete order
+app.post('/delete-order/:id', async (req, res) => {
+  const orderId = req.params.id;
+
+  try {
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+    
+    if (!deletedOrder) {
+      return res.status(404).send('Order not found');
+    }
+    
+    res.redirect('/orders');
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).send('Failed to delete order');
+  }
+});
+
+// ============== ORDER API ROUTES ==============
+
+// Get single order by ID (API endpoint)
+app.get("/orders/:id", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    res.json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Get order statistics (API endpoint)
+app.get("/orders/stats/summary", async (req, res) => {
+  try {
+    const stats = await Order.getOrderStats();
+    res.json(stats);
+  } catch (error) {
+    console.error("Error fetching order stats:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Update order status only (API endpoint)
+app.patch("/orders/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    const existingOrder = await Order.findById(req.params.id);
+    if (!existingOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    const updateData = { 
+      status,
+      updatedAt: Date.now()
+    };
+    
+    // If status is being changed to Delivered, set delivery date
+    if (status === 'Delivered' && existingOrder.status !== 'Delivered') {
+      updateData.delivery_date = new Date();
+    }
+    
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    res.json({ message: "Order status updated successfully", order });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ 
+      message: "Error updating order status",
+      error: error.message 
+    });
+  }
+});
+
 
 
 // ============== PRODUCT UPDATE & DELETE ROUTES ==============
